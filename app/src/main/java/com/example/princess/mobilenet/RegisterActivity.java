@@ -51,10 +51,10 @@ public class RegisterActivity extends AppCompatActivity {
                 String user = edtUser.getText().toString();
                 String password = edtPassword.getText().toString();
 
-                QBUser qbUuser = new QBUser(user,password);
+                QBUser qbUser = new QBUser(user,password);
+                qbUser.setFullName(edtUser.getText().toString());
 
-
-                QBUsers.signUp(qbUuser).performAsync(new QBEntityCallback<QBUser>() {
+                QBUsers.signUp(qbUser).performAsync(new QBEntityCallback<QBUser>() {
                     @Override
                     public void onSuccess(QBUser qbUser, Bundle bundle) {
                         Toast.makeText(getBaseContext(), "Account created",Toast.LENGTH_SHORT).show();
