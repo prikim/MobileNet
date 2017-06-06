@@ -77,8 +77,8 @@ public class ChatLogAdapter extends BaseAdapter{
 
 
             //grabs first letter of chat log title for image
-            TextDrawable drawable = builder.build(title.getText().toString().substring(0,1).toUpperCase(),randomColor);
-            imageView.setImageDrawable(drawable);
+            //TextDrawable drawable = builder.build(title.getText().toString().substring(0,1).toUpperCase(),randomColor);
+            //imageView.setImageDrawable(drawable);
         }
         return view;
     }
