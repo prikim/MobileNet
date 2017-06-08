@@ -12,6 +12,8 @@ import java.util.List;
 
 public class Common {
 
+    public static final String extra = "Dialogs";
+
 
     public static String createChatDialogName(List<Integer> qbUsers)
     {

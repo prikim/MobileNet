@@ -137,6 +137,10 @@ public class UserListActivity extends AppCompatActivity {
                     public void onSuccess(QBChatDialog qbChatDialog, Bundle bundle) {
                         mdialog.dismiss();
                         Toast.makeText(getBaseContext(),"Session created successfully", Toast.LENGTH_SHORT).show();
+
+
+
+
                         finish();
                     }
 

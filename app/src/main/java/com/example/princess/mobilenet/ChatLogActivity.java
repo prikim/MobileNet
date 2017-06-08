@@ -7,9 +7,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.example.princess.mobilenet.Adapter.ChatLogAdapter;
+import com.example.princess.mobilenet.Common.Common;
+import com.example.princess.mobilenet.Holder.QBUsersHolder;
 import com.quickblox.auth.QBAuth;
 import com.quickblox.auth.session.BaseService;
 import com.quickblox.auth.session.QBSession;
@@ -20,7 +23,10 @@ import com.quickblox.core.QBEntityCallback;
 import com.quickblox.core.exception.BaseServiceException;
 import com.quickblox.core.exception.QBResponseException;
 import com.quickblox.core.request.QBRequestGetBuilder;
+import com.quickblox.users.QBUsers;
 import com.quickblox.users.model.QBUser;
+
+import org.jivesoftware.smack.chat.ChatMessageListener;
 
 import java.util.ArrayList;
 
@@ -47,6 +53,16 @@ public class ChatLogActivity extends AppCompatActivity {
         createChat();
 
         lstChatlogs = (ListView)findViewById(R.id.lstChatLog);
+        lstChatlogs.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                QBChatDialog qbChatDialog = (QBChatDialog)lstChatlogs.getAdapter().getItem(position);
+                Intent intent = new Intent(ChatLogActivity.this, MessageActivity.class);
+                intent.putExtra(Common.extra,qbChatDialog);
+                startActivity(intent);
+
+            }
+        });
 
         loadChatLogs();
 
@@ -96,6 +112,19 @@ public class ChatLogActivity extends AppCompatActivity {
         String user,password;
         user = getIntent().getStringExtra("user");
         password = getIntent().getStringExtra("password");
+
+
+        QBUsers.getUsers(null).performAsync(new QBEntityCallback<ArrayList<QBUser>>() {
+            @Override
+            public void onSuccess(ArrayList<QBUser> qbUsers, Bundle bundle) {
+                QBUsersHolder.getInstance().putUsers(qbUsers);
+            }
+
+            @Override
+            public void onError(QBResponseException e) {
+
+            }
+        });
 
         final QBUser qbUser = new QBUser(user,password);
         QBAuth.createSession(qbUser).performAsync(new QBEntityCallback<QBSession>() {
