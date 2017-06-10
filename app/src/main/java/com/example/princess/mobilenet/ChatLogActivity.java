@@ -12,13 +12,21 @@ import android.widget.ListView;
 
 import com.example.princess.mobilenet.Adapter.ChatLogAdapter;
 import com.example.princess.mobilenet.Common.Common;
+import com.example.princess.mobilenet.Holder.QBLogHolder;
 import com.example.princess.mobilenet.Holder.QBUsersHolder;
+import com.example.princess.mobilenet.Holder.UnreadHolder;
 import com.quickblox.auth.QBAuth;
 import com.quickblox.auth.session.BaseService;
 import com.quickblox.auth.session.QBSession;
 import com.quickblox.chat.QBChatService;
+import com.quickblox.chat.QBIncomingMessagesManager;
 import com.quickblox.chat.QBRestChatService;
+import com.quickblox.chat.QBSystemMessagesManager;
+import com.quickblox.chat.exception.QBChatException;
+import com.quickblox.chat.listeners.QBChatDialogMessageListener;
+import com.quickblox.chat.listeners.QBSystemMessageListener;
 import com.quickblox.chat.model.QBChatDialog;
+import com.quickblox.chat.model.QBChatMessage;
 import com.quickblox.core.QBEntityCallback;
 import com.quickblox.core.exception.BaseServiceException;
 import com.quickblox.core.exception.QBResponseException;
@@ -29,8 +37,10 @@ import com.quickblox.users.model.QBUser;
 import org.jivesoftware.smack.chat.ChatMessageListener;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
-public class ChatLogActivity extends AppCompatActivity {
+public class ChatLogActivity extends AppCompatActivity implements QBSystemMessageListener,QBChatDialogMessageListener{
 
 
     FloatingActionButton floatingActionButton;
@@ -79,6 +89,7 @@ public class ChatLogActivity extends AppCompatActivity {
         });
 
 
+
     }
 
     private void loadChatLogs(){
@@ -88,11 +99,39 @@ public class ChatLogActivity extends AppCompatActivity {
 
         QBRestChatService.getChatDialogs(null,requestBuilder).performAsync(new QBEntityCallback<ArrayList<QBChatDialog>>() {
             @Override
-            public void onSuccess(ArrayList<QBChatDialog> qbChatDialogs, Bundle bundle) {
+            public void onSuccess(final ArrayList<QBChatDialog> qbChatDialogs, Bundle bundle) {
 
-                ChatLogAdapter adapter = new ChatLogAdapter(getBaseContext(),qbChatDialogs);
-                lstChatlogs.setAdapter(adapter);
-                adapter.notifyDataSetChanged();
+                QBLogHolder.getInstance().placeLogs(qbChatDialogs);
+
+
+                Set<String> setIDS = new HashSet<>();
+                for(QBChatDialog chatDialog:qbChatDialogs)
+                {
+                    setIDS.add(chatDialog.getDialogId());
+                }
+
+                QBRestChatService.getTotalUnreadMessagesCount(setIDS,UnreadHolder.getInstance().getBundle())
+                        .performAsync(new QBEntityCallback<Integer>() {
+                            @Override
+                            public void onSuccess(Integer integer, Bundle bundle) {
+
+                                UnreadHolder.getInstance().setBundle(bundle);
+
+                                QBLogHolder.getInstance().placeLogs(qbChatDialogs);
+                                ChatLogAdapter adapter = new ChatLogAdapter(getBaseContext(),QBLogHolder.getInstance().getAllLogs());
+                                lstChatlogs.setAdapter(adapter);
+                                adapter.notifyDataSetChanged();
+
+
+                            }
+
+                            @Override
+                            public void onError(QBResponseException e) {
+
+                            }
+                        });
+
+
             }
 
             @Override
@@ -141,6 +180,15 @@ public class ChatLogActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(Object o, Bundle bundle) {
                         dia.dismiss();
+
+
+                        QBSystemMessagesManager qbSystemMessagesManager = QBChatService.getInstance().getSystemMessagesManager();
+                        qbSystemMessagesManager.addSystemMessageListener(ChatLogActivity.this);
+
+
+                        QBIncomingMessagesManager qbIncomingMessagesManager = QBChatService.getInstance().getIncomingMessagesManager();
+                        qbIncomingMessagesManager.addDialogMessageListener(ChatLogActivity.this);
+
                     }
 
                     @Override
@@ -155,5 +203,44 @@ public class ChatLogActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    @Override
+    public void processMessage(QBChatMessage qbChatMessage) {
+
+        QBRestChatService.getChatDialogById(qbChatMessage.getBody()).performAsync(new QBEntityCallback<QBChatDialog>() {
+            @Override
+            public void onSuccess(QBChatDialog qbChatDialog, Bundle bundle) {
+                QBLogHolder.getInstance().placeALog(qbChatDialog);
+
+                ArrayList<QBChatDialog> adapterSource =  QBLogHolder.getInstance().getAllLogs();
+
+                ChatLogAdapter adapters = new ChatLogAdapter(getBaseContext(),adapterSource);
+                lstChatlogs.setAdapter(adapters);
+                adapters.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onError(QBResponseException e) {
+
+            }
+        });
+    }
+
+    @Override
+    public void processError(QBChatException e, QBChatMessage qbChatMessage) {
+        Log.e("ERROR",""+e.getMessage());
+    }
+
+    @Override
+    public void processMessage(String s, QBChatMessage qbChatMessage, Integer integer) {
+
+        loadChatLogs();
+
+    }
+
+    @Override
+    public void processError(String s, QBChatException e, QBChatMessage qbChatMessage, Integer integer) {
+
     }
 }
