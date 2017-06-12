@@ -14,20 +14,6 @@ public class Common {
 
     public static final String extra = "Dialogs";
 
-    public static boolean Online = false;
-
-
-    public static boolean get_status()
-    {
-        return Online;
-    }
-
-    public static boolean set_status(boolean status)
-    {
-        Online = status;
-        return Online;
-    }
-
 
     public static String createChatDialogName(List<Integer> qbUsers)
     {

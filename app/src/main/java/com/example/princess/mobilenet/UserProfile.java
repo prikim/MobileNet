@@ -1,5 +1,4 @@
 package com.example.princess.mobilenet;
-
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
@@ -12,6 +11,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.princess.mobilenet.MainActivity;
 import com.example.princess.mobilenet.Common.Common;
 import com.quickblox.chat.QBChat;
 import com.quickblox.chat.QBChatService;
@@ -22,7 +22,10 @@ import com.quickblox.core.request.QBRequestGetBuilder;
 import com.quickblox.users.QBUsers;
 import com.quickblox.users.model.QBUser;
 
+import java.util.ArrayList;
+
 public class UserProfile extends AppCompatActivity {
+
 
 
 
@@ -30,6 +33,7 @@ public class UserProfile extends AppCompatActivity {
 
     EditText editPassword,editOldPassword,editBattlenet;
     Button btnUpdate,btnCancel;
+
 
 
     @Override
@@ -48,6 +52,8 @@ public class UserProfile extends AppCompatActivity {
             default:
                 break;
         }
+
+
         return true;
     }
 
@@ -58,7 +64,7 @@ public class UserProfile extends AppCompatActivity {
                 QBChatService.getInstance().logout(new QBEntityCallback<Void>() {
                     @Override
                     public void onSuccess(Void aVoid, Bundle bundle) {
-                        Common.set_status(false);
+
                         Toast.makeText(UserProfile.this, "Logged out", Toast.LENGTH_SHORT).show();
                         Intent intent = new Intent(UserProfile.this,MainActivity.class);
                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -66,7 +72,7 @@ public class UserProfile extends AppCompatActivity {
 
                         startActivity(intent);
 
-                        //set status to offline
+
 
                         finish();
                     }
@@ -112,7 +118,7 @@ public class UserProfile extends AppCompatActivity {
             public void onClick(View v) {
                 String password = editPassword.getText().toString();
                 String oldPassword = editOldPassword.getText().toString();
-                String BattlenetID = "#" + editBattlenet.getText().toString();
+                //String BattlenetID = "#" + editBattlenet.getText().toString();
 
 
 
@@ -124,8 +130,8 @@ public class UserProfile extends AppCompatActivity {
                 if(!Common.isEmptyString(password))
                     user.setPassword(password);
 
-                if(!Common.isEmptyString(BattlenetID))
-                    user.setCustomData(BattlenetID);
+                //if(!Common.isEmptyString(BattlenetID))
+                  //  user.setPhone(BattlenetID);
 
                 final ProgressDialog mDialog = new ProgressDialog(UserProfile.this);
 
@@ -154,10 +160,13 @@ public class UserProfile extends AppCompatActivity {
     private void loadUserProfile() {
         QBUser currentUser = QBChatService.getInstance().getUser();
         String user = currentUser.getLogin();
-        String battleTag = currentUser.getCustomData();
+        //String battleTag = currentUser.getCustomData();
 
 
-        editBattlenet.setText(battleTag);
+
+
+
+        //editBattlenet.setText(battleTag);
 
 
     }
@@ -170,7 +179,7 @@ public class UserProfile extends AppCompatActivity {
 
         editPassword = (EditText)findViewById(R.id.update_password);
         editOldPassword = (EditText)findViewById(R.id.update_old_password);
-        editBattlenet = (EditText)findViewById(R.id.update_battlenetID);
+        //editBattlenet = (EditText)findViewById(R.id.update_battlenetID);
 
 
 

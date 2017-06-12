@@ -22,6 +22,21 @@ public class MainActivity extends AppCompatActivity {
     static final String AUTH_SECRET = "VZh2SMDzPV2-Gsk";
     static final String ACCOUNT_KEY = "XcGcx_EATaazDNXGhBBn";
 
+    public static boolean Online = false;
+    String online = "online";
+    String offline = "offline";
+
+    public static boolean get_status()
+    {
+        return Online;
+    }
+
+    public static boolean set_status(boolean status)
+    {
+        Online = status;
+        return Online;
+    }
+
 
 
     Button btnLogin,btnRegister;
@@ -57,7 +72,8 @@ public class MainActivity extends AppCompatActivity {
                 final String user = edtUser.getText().toString();
                 final String password = edtPassword.getText().toString();
 
-                QBUser qbUser = new QBUser(user,password);
+                QBUser qbUser = new QBUser(user, password);
+
 
 
 
@@ -73,7 +89,8 @@ public class MainActivity extends AppCompatActivity {
 
 
                         //set status to online
-                        Common.set_status(true);
+
+
 
                         finish();
 

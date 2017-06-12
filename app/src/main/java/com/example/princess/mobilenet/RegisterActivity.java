@@ -52,6 +52,7 @@ public class RegisterActivity extends AppCompatActivity {
                 String password = edtPassword.getText().toString();
 
                 QBUser qbUser = new QBUser(user,password);
+                //qbUser.setEmail("false");
                 qbUser.setFullName(edtUser.getText().toString());
 
                 QBUsers.signUp(qbUser).performAsync(new QBEntityCallback<QBUser>() {

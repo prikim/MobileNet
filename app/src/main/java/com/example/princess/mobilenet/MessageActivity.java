@@ -328,7 +328,6 @@ public class MessageActivity extends AppCompatActivity implements QBChatDialogMe
             }
         };
 
-        qbChatDialog.addParticipantListener(participantListener);
 
 
     }

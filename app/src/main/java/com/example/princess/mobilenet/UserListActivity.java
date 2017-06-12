@@ -240,9 +240,6 @@ public class UserListActivity extends AppCompatActivity {
 
 
     private void getAllUsers(){
-
-
-
         QBUsers.getUsers(null).performAsync(new QBEntityCallback<ArrayList<QBUser>>() {
             @Override
             public void onSuccess(ArrayList<QBUser> qbUsers, Bundle bundle) {
@@ -252,14 +249,8 @@ public class UserListActivity extends AppCompatActivity {
                 for(QBUser user : qbUsers)
                 {
                     if(!user.getLogin().equals(QBChatService.getInstance().getUser().getLogin())) {
-                        //if valid user, add to user list
                         qbUserWithoutCurrent.add(user);
-
-                        //handle online status in userlistadapter class
                     }
-
-
-
                 }
 
                 UserListAdapter adapter = new UserListAdapter(getBaseContext(),qbUserWithoutCurrent);
