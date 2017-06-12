@@ -65,8 +65,12 @@ public class UserListActivity extends AppCompatActivity {
                     createGroupChat(lstUsers.getCheckedItemPositions());
 
                 //no users are chosen, so all chat is instantiated
-                else
+                else {
+                    //no users are chosen, so make it so a group chat is formed, but with every online user
+
                     createALLChat(lstUsers.getCheckedItemPositions());
+                }
+
             }
         });
     }
@@ -129,10 +133,60 @@ public class UserListActivity extends AppCompatActivity {
 
     private void createALLChat(SparseBooleanArray checkedItemPositions) {
 
-        ProgressDialog mdialog = new ProgressDialog(UserListActivity.this);
+        final ProgressDialog mdialog = new ProgressDialog(UserListActivity.this);
         mdialog.setMessage("Loading . . .");
         mdialog.setCanceledOnTouchOutside(false);
         mdialog.show();
+
+
+        int countChoice = lstUsers.getCount();
+        ArrayList<Integer> occupantIdsList = new ArrayList<>();
+        for(int i = 0;i<countChoice;i++)
+        {
+            if(checkedItemPositions.get(i))
+            {
+                QBUser user = (QBUser)lstUsers.getItemAtPosition(i);
+                occupantIdsList.add(user.getId());
+            }
+        }
+
+        final QBChatDialog dialog = new QBChatDialog();
+        dialog.setName("All Chat");
+        dialog.setType(QBDialogType.GROUP);
+        dialog.setOccupantsIds(occupantIdsList);
+
+
+        QBRestChatService.createChatDialog(dialog).performAsync(new QBEntityCallback<QBChatDialog>() {
+            @Override
+            public void onSuccess(QBChatDialog qbChatDialog, Bundle bundle) {
+                mdialog.dismiss();
+                Toast.makeText(getBaseContext(),"Group Session created successfully", Toast.LENGTH_SHORT).show();
+
+                QBSystemMessagesManager qbSystemMessagesManager = QBChatService.getInstance().getSystemMessagesManager();
+                QBChatMessage qbChatMessage = new QBChatMessage();
+
+                for(int i = 0; i <qbChatDialog.getOccupants().size(); i++)
+                {
+                    qbChatMessage.setRecipientId(qbChatDialog.getOccupants().get(i));
+                    try {
+                        qbSystemMessagesManager.sendSystemMessage(qbChatMessage);
+                    } catch (SmackException.NotConnectedException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+
+
+
+                finish();
+            }
+
+            @Override
+            public void onError(QBResponseException e) {
+                Log.e("ERROR",e.getMessage());
+
+            }
+        });
 
 
 
@@ -187,6 +241,8 @@ public class UserListActivity extends AppCompatActivity {
 
     private void getAllUsers(){
 
+
+
         QBUsers.getUsers(null).performAsync(new QBEntityCallback<ArrayList<QBUser>>() {
             @Override
             public void onSuccess(ArrayList<QBUser> qbUsers, Bundle bundle) {
@@ -195,8 +251,15 @@ public class UserListActivity extends AppCompatActivity {
                 ArrayList<QBUser> qbUserWithoutCurrent = new ArrayList<QBUser>();
                 for(QBUser user : qbUsers)
                 {
-                    if(!user.getLogin().equals(QBChatService.getInstance().getUser().getLogin()))
+                    if(!user.getLogin().equals(QBChatService.getInstance().getUser().getLogin())) {
+                        //if valid user, add to user list
                         qbUserWithoutCurrent.add(user);
+
+                        //handle online status in userlistadapter class
+                    }
+
+
+
                 }
 
                 UserListAdapter adapter = new UserListAdapter(getBaseContext(),qbUserWithoutCurrent);

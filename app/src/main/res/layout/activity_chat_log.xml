@@ -1,28 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.example.princess.mobilenet.ChatLogActivity">
 
+    
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/chat_dialog_toolbar"
+        android:minHeight="?attr/actionBarSize"
+        android:background="?attr/colorPrimaryDark"
+        app:titleTextColor="@android:color/white"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
 
+
+    
+    
     <ListView
+        android:layout_below="@+id/chat_dialog_toolbar"
         android:id="@+id/lstChatLog"
         android:layout_width="match_parent"
         android:layout_height="match_parent"></ListView>
 
 
+    
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/chatlog_adduser"
-        android:layout_gravity="bottom|right"
-        android:background="@color/colorPrimary"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:background="@color/colorPrimaryDark"
         android:layout_margin="16dp"
-        android:src="@drawable/ic_action_name"
+        android:src="@drawable/ic_create"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:title="New Chat"
         app:layout_anchor="@id/lstChatLog"
+        android:contextClickable="true"
         app:layout_anchorGravity="bottom|right|end"
+
         />
-</android.support.design.widget.CoordinatorLayout>
+</RelativeLayout>

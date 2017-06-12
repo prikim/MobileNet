@@ -7,12 +7,26 @@ import com.quickblox.users.model.QBUser;
 import java.util.List;
 
 /**
- * Created by Avery on 6/4/17.
+ * Created by Princess on 6/4/17.
  */
 
 public class Common {
 
     public static final String extra = "Dialogs";
+
+    public static boolean Online = false;
+
+
+    public static boolean get_status()
+    {
+        return Online;
+    }
+
+    public static boolean set_status(boolean status)
+    {
+        Online = status;
+        return Online;
+    }
 
 
     public static String createChatDialogName(List<Integer> qbUsers)
@@ -25,4 +39,9 @@ public class Common {
             name = name.replace(30,name.length()-1,"...");
         return name.toString();
     }
+
+    public static boolean isEmptyString(String content){
+        return (content != null && !content.trim().isEmpty()?false:true);
+    }
+
 }

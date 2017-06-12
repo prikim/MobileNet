@@ -8,6 +8,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.princess.mobilenet.Common.Common;
 import com.quickblox.auth.session.QBSettings;
 import com.quickblox.core.QBEntityCallback;
 import com.quickblox.core.exception.QBResponseException;
@@ -20,6 +21,7 @@ public class MainActivity extends AppCompatActivity {
     static final String AUTH_KEY = "CRuVJsHVQQjqsrL";
     static final String AUTH_SECRET = "VZh2SMDzPV2-Gsk";
     static final String ACCOUNT_KEY = "XcGcx_EATaazDNXGhBBn";
+
 
 
     Button btnLogin,btnRegister;
@@ -58,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
                 QBUser qbUser = new QBUser(user,password);
 
 
+
                 QBUsers.signIn(qbUser).performAsync(new QBEntityCallback<QBUser>(){
                     @Override
                     public void onSuccess(QBUser qbUser, Bundle bundle){
@@ -68,6 +71,10 @@ public class MainActivity extends AppCompatActivity {
                         intent.putExtra("password",password);
                         startActivity(intent);
 
+
+                        //set status to online
+                        Common.set_status(true);
+
                         finish();
 
                     }
@@ -77,12 +84,15 @@ public class MainActivity extends AppCompatActivity {
                     public void onError(QBResponseException e){
                         Toast.makeText(getBaseContext(), ""+e.getMessage(), Toast.LENGTH_SHORT).show();
 
+
                     }
                 });
             }
         });
 
     }
+
+
 
     private void initializeFramework(){
         QBSettings.getInstance().init(getApplicationContext(),APP_ID,AUTH_KEY,AUTH_SECRET);
