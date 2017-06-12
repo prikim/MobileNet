@@ -89,7 +89,6 @@ public class MessageActivity extends AppCompatActivity implements QBChatDialogMe
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         getMenuInflater().inflate(R.menu.chat_message_context_menu,menu);
-        return;
     }
 
     //when a user wants to delete a message theyve sent
@@ -158,74 +157,77 @@ public class MessageActivity extends AppCompatActivity implements QBChatDialogMe
             @Override
             public void onClick(View v) {
 
-                //if user is not editting
-                if(isEditing == false) {
+                    //if user is not editting
+                    if (isEditing == false) {
 
-                    QBChatMessage chatMessage = new QBChatMessage();
-                    chatMessage.setBody(editContent.getText().toString());
-                    chatMessage.setSenderId(QBChatService.getInstance().getUser().getId());
-                    chatMessage.setSaveToHistory(true);
+                        QBChatMessage chatMessage = new QBChatMessage();
+                        chatMessage.setBody(editContent.getText().toString());
+                        chatMessage.setSenderId(QBChatService.getInstance().getUser().getId());
+                        chatMessage.setSaveToHistory(true);
 
 
-                    try {
-                        qbChatDialog.sendMessage(chatMessage);
-                    } catch (SmackException.NotConnectedException e) {
-                        e.printStackTrace();
+                        try {
+                            qbChatDialog.sendMessage(chatMessage);
+                        } catch (SmackException.NotConnectedException e) {
+                            e.printStackTrace();
+                        }
+
+                        if (qbChatDialog.getType() == QBDialogType.PRIVATE) {
+                            MessagesHolder.getInstance().addSingleMessage(qbChatDialog.getDialogId(), chatMessage);
+                            ArrayList<QBChatMessage> messages = MessagesHolder.getInstance().getMessagesByID(qbChatDialog.getDialogId());
+
+                            adapter = new MessageAdapter(getBaseContext(), messages);
+                            lstChatMessages.setAdapter(adapter);
+                            adapter.notifyDataSetChanged();
+                        }
+
+
+                        editContent.setText("");
+                        editContent.setFocusable(true);
                     }
 
-                    if (qbChatDialog.getType() == QBDialogType.PRIVATE) {
-                        MessagesHolder.getInstance().addSingleMessage(qbChatDialog.getDialogId(), chatMessage);
-                        ArrayList<QBChatMessage> messages = MessagesHolder.getInstance().getMessagesByID(qbChatDialog.getDialogId());
 
-                        adapter = new MessageAdapter(getBaseContext(), messages);
-                        lstChatMessages.setAdapter(adapter);
-                        adapter.notifyDataSetChanged();
+                    //user is editting text
+                    else {
+
+                        final ProgressDialog editText = new ProgressDialog(MessageActivity.this);
+                        editText.setMessage("Editing text");
+                        editText.show();
+
+
+                        QBMessageUpdateBuilder messageUpdateBuilder = new QBMessageUpdateBuilder();
+                        messageUpdateBuilder.updateText(editContent.getText().toString()).markDelivered().markRead();
+
+                        QBRestChatService.updateMessage(edtMessage.getId(), qbChatDialog.getDialogId(), messageUpdateBuilder)
+                                .performAsync(new QBEntityCallback<Void>() {
+                                    @Override
+                                    public void onSuccess(Void aVoid, Bundle bundle) {
+                                        //load, but with new changes added
+                                        LoadMessages();
+                                        isEditing = false;
+                                        //exit out of edit mode
+                                        editText.dismiss();
+
+
+                                        editContent.setText("");
+                                        editContent.setFocusable(true);
+                                    }
+
+                                    @Override
+                                    public void onError(QBResponseException e) {
+                                        Toast.makeText(getBaseContext(), "" + e.getMessage(), Toast.LENGTH_SHORT).show();
+
+                                    }
+                                });
                     }
 
-
-                    editContent.setText("");
-                    editContent.setFocusable(true);
-                }
-
-
-                //user is editting text
-                else{
-
-                    final ProgressDialog editText = new ProgressDialog(MessageActivity.this);
-                    editText.setMessage("Editing text");
-                    editText.show();
-
-
-                    QBMessageUpdateBuilder messageUpdateBuilder = new QBMessageUpdateBuilder();
-                    messageUpdateBuilder.updateText(editContent.getText().toString()).markDelivered().markRead();
-
-                    QBRestChatService.updateMessage(edtMessage.getId(),qbChatDialog.getDialogId(),messageUpdateBuilder)
-                            .performAsync(new QBEntityCallback<Void>() {
-                                @Override
-                                public void onSuccess(Void aVoid, Bundle bundle) {
-                                    //load, but with new changes added
-                                    LoadMessages();
-                                    isEditing = false;
-                                    //exit out of edit mode
-                                    editText.dismiss();
-
-
-                                    editContent.setText("");
-                                    editContent.setFocusable(true);
-                                }
-
-                                @Override
-                                public void onError(QBResponseException e) {
-                                    Toast.makeText(getBaseContext(),""+e.getMessage(), Toast.LENGTH_SHORT).show();
-
-                                }
-                            });
-                }
 
             }
         });
 
+
     }
+
 
     private void LoadMessages() {
         QBMessageGetBuilder messageGbuilder = new QBMessageGetBuilder();
@@ -342,6 +344,8 @@ public class MessageActivity extends AppCompatActivity implements QBChatDialogMe
 
         //Edit Message
         registerForContextMenu(lstChatMessages);
+
+
 
 
 

@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -46,9 +47,53 @@ import java.util.Set;
 public class ChatLogActivity extends AppCompatActivity implements QBSystemMessageListener,QBChatDialogMessageListener{
 
 
+    int contextMenuIndexClicked = -1;
     FloatingActionButton floatingActionButton;
     ListView lstChatlogs;
 
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        getMenuInflater().inflate(R.menu.chat_dialog_context_menu,menu);
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)item.getMenuInfo();
+       contextMenuIndexClicked = info.position;
+
+        switch(item.getItemId())
+        {
+            case R.id.context_delete_dialog:
+                deleteDialog(info.position);
+                break;
+        }
+        return true;
+    }
+
+    private void deleteDialog(int index) {
+
+        final QBChatDialog chatDialog = (QBChatDialog)lstChatlogs.getAdapter().getItem(index);
+        QBRestChatService.deleteDialog(chatDialog.getDialogId(),false)
+                .performAsync(new QBEntityCallback<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid, Bundle bundle) {
+                        QBLogHolder.getInstance().removeDialog(chatDialog.getDialogId());
+                        ChatLogAdapter adapter = new ChatLogAdapter(getBaseContext(),QBLogHolder.getInstance().getAllLogs());
+                        lstChatlogs.setAdapter(adapter);
+                        adapter.notifyDataSetChanged();
+
+                    }
+
+                    @Override
+                    public void onError(QBResponseException e) {
+
+                    }
+                });
+
+
+
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -95,6 +140,12 @@ public class ChatLogActivity extends AppCompatActivity implements QBSystemMessag
         createChat();
 
         lstChatlogs = (ListView)findViewById(R.id.lstChatLog);
+
+
+
+        registerForContextMenu(lstChatlogs);
+
+
         lstChatlogs.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {

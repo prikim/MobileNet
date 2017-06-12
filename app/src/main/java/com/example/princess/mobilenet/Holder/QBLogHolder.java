@@ -74,5 +74,10 @@ public class QBLogHolder {
 
     }
 
+    public void removeDialog(String id)
+    {
+        qbChatDialogHashMap.remove(id);
+    }
+
 
 }
